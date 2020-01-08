@@ -5,7 +5,11 @@ import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import android.widget.Toast;
 
 import com.telran.a06_01_20_hw.databinding.ActivityListBinding;
 
@@ -17,8 +21,8 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ListViewModel viewModel = new ListViewModel(new StoreProvider(this));
+        StoreProvider provider = new StoreProvider(this);
+        ListViewModel viewModel = new ListViewModel(provider);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_list);
         binding.setViewModel(viewModel);
 
@@ -26,6 +30,8 @@ public class ListActivity extends AppCompatActivity {
             adapter = new ContactAdapter(list);
             binding.contactList.setAdapter(adapter);
         });
+
+
 
         viewModel.getStateLiveData().observe(this, state ->{
             switch (state){
@@ -35,16 +41,24 @@ public class ListActivity extends AppCompatActivity {
                     break;
                 case "ADD":
                     Intent intent = new Intent(this,EditActivity.class);
+                    intent.putExtra("INDEX",-1);
                     startActivity(intent);
                     break;
             }
         });
 
+
+        binding.contactList.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(this,EditActivity.class);
+            intent.putExtra("INDEX",position);
+            startActivity(intent);
+        });
+
     }
 
-    @Override
-    protected void onRestart() {
-        binding.getViewModel().update();
-        super.onRestart();
-    }
+//    @Override
+//    protected void onRestart() {
+//        binding.getViewModel().update();
+//        super.onRestart();
+//    }
 }

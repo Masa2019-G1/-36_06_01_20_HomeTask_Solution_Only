@@ -3,6 +3,9 @@ package com.telran.a06_01_20_hw;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,8 +16,14 @@ public class StoreProvider {
     private static final String TOKEN = "TOKEN";
     private Context context;
 
+    private MutableLiveData<List<Contact>> contactsLiveData = new MutableLiveData<>();
+
     public StoreProvider(Context context) {
         this.context = context;
+    }
+
+    public LiveData<List<Contact>> getContactLiveData(){
+        return contactsLiveData;
     }
 
     public boolean login(String email, String password) {
@@ -68,7 +77,12 @@ public class StoreProvider {
         save(list);
     }
 
+    public Contact get(int index){
+        return getAllContacts().get(index);
+    }
+
     private boolean save(List<Contact> list) {
+        boolean res;
         if (!list.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < list.size(); i++) {
@@ -77,12 +91,18 @@ public class StoreProvider {
                     sb.append(";");
                 }
             }
-            return context.getSharedPreferences(CONTACTS, Context.MODE_PRIVATE)
+            res = context.getSharedPreferences(CONTACTS, Context.MODE_PRIVATE)
                     .edit()
                     .putString(token(), sb.toString())
                     .commit();
+        }else {
+            res =  context.getSharedPreferences(CONTACTS, Context.MODE_PRIVATE)
+                    .edit()
+                    .remove(token())
+                    .commit();
         }
-        return false;
+        contactsLiveData.setValue(list);
+        return res;
     }
 
     private String token() {

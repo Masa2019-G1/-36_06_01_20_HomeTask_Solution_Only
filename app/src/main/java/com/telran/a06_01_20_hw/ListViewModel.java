@@ -1,5 +1,6 @@
 package com.telran.a06_01_20_hw;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
@@ -13,9 +14,13 @@ public class ListViewModel {
         this.provider = provider;
         listLiveData.setValue(provider.getAllContacts());
         stateLiveData.setValue("IDLE");
+
+        provider.getContactLiveData().observeForever(list->{
+            listLiveData.setValue(list);
+        });
     }
 
-    public MutableLiveData<List<Contact>> getListLiveData() {
+    public LiveData<List<Contact>> getListLiveData() {
         return listLiveData;
     }
 
@@ -24,9 +29,9 @@ public class ListViewModel {
         return stateLiveData;
     }
 
-    public void update(){
-        listLiveData.setValue(provider.getAllContacts());
-    }
+//    public void update(){
+//        listLiveData.setValue(provider.getAllContacts());
+//    }
 
     public void logout(){
         provider.logout();
@@ -35,5 +40,9 @@ public class ListViewModel {
 
     public void addContact(){
         stateLiveData.setValue("ADD");
+    }
+
+    public void showToast(){
+        stateLiveData.setValue("SHOW");
     }
 }
